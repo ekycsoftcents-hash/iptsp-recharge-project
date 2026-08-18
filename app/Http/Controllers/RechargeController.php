@@ -39,7 +39,8 @@ final class RechargeController extends Controller
         $credential = TenantProviderCredential::query()->where('tenant_id', $tenantId)->findOrFail($data['credential_id']);
 
         try {
-            $recharge = $service->create($tenantId, $customer->id, $credential, (string) $data['amount']);
+            $identifier = (string) ($customer->external_customer_id ?: $customer->phone ?: $customer->name);
+            $recharge = $service->create($tenantId, $customer->id, $credential, (string) $data['amount'], $identifier);
         } catch (RuntimeException $exception) {
             return back()->withErrors(['amount' => $exception->getMessage()])->withInput();
         }
