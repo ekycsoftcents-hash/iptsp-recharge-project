@@ -9,7 +9,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Webhooks\PipraPayWebhookController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check() ? redirect()->route('dashboard') : redirect()->route('login'));
+Route::get('/', fn () => auth()->check() ? redirect()->route('dashboard') : view('landing'));
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'application' => 'IPTSP Recharge SaaS']))->name('health');
 
 Route::middleware('guest')->group(function (): void {

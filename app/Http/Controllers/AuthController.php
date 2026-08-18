@@ -26,7 +26,8 @@ final class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        return redirect()->intended(route('dashboard'));
+        $destination = $request->user()->role === 'platform_admin' ? route('admin.index') : route('dashboard');
+        return redirect()->intended($destination);
     }
 
     public function showRegister(): View { return view('auth.register'); }
