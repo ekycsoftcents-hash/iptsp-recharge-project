@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('content')
+<div class="card" style="max-width:560px;margin:40px auto"><h1>Create reseller account</h1><form method="POST" action="{{ route('register') }}">@csrf<label>Business name</label><input class="input" name="business_name" value="{{ old('business_name') }}" required><label>Your name</label><input class="input" name="name" value="{{ old('name') }}" required><label>Email</label><input class="input" type="email" name="email" value="{{ old('email') }}" required><label>Password</label><input class="input" type="password" name="password" required><label>Confirm password</label><input class="input" type="password" name="password_confirmation" required>@if($errors->any())<div class="error">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif<button class="btn">Create account</button></form></div>
+@endsection

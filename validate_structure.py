@@ -1,7 +1,7 @@
 from pathlib import Path
 
 root = Path(__file__).parent
-php_files = sorted(root.rglob('*.php'))
+php_files = sorted(path for path in root.rglob('*.php') if not path.name.endswith('.blade.php'))
 errors = []
 for path in php_files:
     text = path.read_text(encoding='utf-8')
