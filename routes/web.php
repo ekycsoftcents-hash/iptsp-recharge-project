@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/recharges', [RechargeController::class, 'store'])->name('recharges.store');
     Route::post('/billing/subscription/checkout', [BillingController::class, 'subscriptionCheckout'])->name('billing.subscription.checkout');
+    Route::post('/billing/wallet-deposit', [BillingController::class, 'walletDepositCheckout'])->name('billing.wallet.deposit');
     Route::get('/payments/piprapay/return', [BillingController::class, 'returnFromGateway'])->name('payments.piprapay.return');
     Route::get('/payments/piprapay/cancel', [BillingController::class, 'cancelFromGateway'])->name('payments.piprapay.cancel');
 

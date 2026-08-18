@@ -44,7 +44,7 @@ final class BillingController extends Controller
             'mobile_number' => $request->user()->tenant?->phone ?? '',
             'return_url' => config('piprapay.return_url'),
             'webhook_url' => route('webhooks.piprapay'),
-            'metadata' => ['order_id' => $order->merchant_order_id, 'payment_order_id' => $order->id],
+            'metadata' => ['order_id' => $order->merchant_order_id, 'payment_order_id' => $order->id, 'subscription_plan_id' => $plan->id],
         ]);
 
         $url = $response['payment_url'] ?? $response['checkout_url'] ?? $response['pp_url'] ?? $response['url'] ?? null;
@@ -52,6 +52,17 @@ final class BillingController extends Controller
             throw new RuntimeException('PipraPay did not return a payment URL. Confirm your API version and endpoint.');
         }
 
+        $order->update(['gateway_payment_url' => $url, 'gateway_response' => $response]);
+        return redirect()->away($url);
+    }
+
+    public function walletDepositCheckout(Request $request, PipraPayGateway $gateway): RedirectResponse
+    {
+        $data = $request->validate(['amount' => ['required', 'numeric', 'min:10', 'max:1000000']]);
+        $order = PaymentOrder::create(['tenant_id' => $request->user()->tenant_id, 'order_type' => 'wallet_deposit', 'gateway' => 'piprapay', 'amount' => $data['amount'], 'currency' => 'BDT', 'merchant_order_id' => 'WAL-' . Str::upper(Str::random(20)), 'expires_at' => now()->addHour()]);
+        $response = $gateway->createPayment(['amount' => (string) $order->amount, 'currency' => 'BDT', 'full_name' => $request->user()->name, 'email_address' => $request->user()->email, 'mobile_number' => $request->user()->tenant?->phone ?? '', 'return_url' => config('piprapay.return_url'), 'webhook_url' => route('webhooks.piprapay'), 'metadata' => ['order_id' => $order->merchant_order_id, 'payment_order_id' => $order->id, 'order_type' => 'wallet_deposit']]);
+        $url = $response['payment_url'] ?? $response['checkout_url'] ?? $response['pp_url'] ?? $response['url'] ?? null;
+        if (! is_string($url) || $url === '') throw new RuntimeException('PipraPay did not return a payment URL.');
         $order->update(['gateway_payment_url' => $url, 'gateway_response' => $response]);
         return redirect()->away($url);
     }
