@@ -1,4 +1,4 @@
-# Laravel Recharge SaaS Starter
+# IPTSP Recharge SaaS Project
 
 This is a starter architecture for a multi-tenant recharge SaaS that is rented to clients on a monthly subscription. Each tenant manages its own customers, provider credentials, wallet, and recharge operations. The application is independent of WHMCS.
 
