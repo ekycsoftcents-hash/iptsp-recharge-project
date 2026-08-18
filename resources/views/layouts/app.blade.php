@@ -9,7 +9,7 @@
     </style>
 </head>
 <body>
-<nav class="nav"><strong>IPTSP Recharge SaaS</strong><span>@auth<a href="{{ route('dashboard') }}">Dashboard</a><a href="{{ route('customers.index') }}">Customers</a><a href="{{ route('providers.credentials') }}">Providers</a><a href="{{ route('recharges.index') }}">Recharge</a>@if(auth()->user()->role === 'platform_admin')<a href="{{ route('admin.index') }}">Super Admin</a>@endif<form style="display:inline" method="POST" action="{{ route('logout') }}">@csrf<button style="background:none;border:0;color:#cbd5e1;cursor:pointer">Logout</button></form>@else<a href="{{ route('login') }}">Login</a><a href="{{ route('register') }}">Register</a>@endauth</span></nav>
+<nav class="nav"><strong>IPTSP Recharge SaaS</strong><span>@auth<a href="{{ route('dashboard') }}">Dashboard</a><a href="{{ route('customers.index') }}">Customers</a><a href="{{ route('providers.credentials') }}">Providers</a><a href="{{ route('recharges.index') }}">Recharge</a><a href="{{ route('billing.index') }}">Billing</a>@if(auth()->user()->role === 'platform_admin')<a href="{{ route('admin.index') }}">Super Admin</a>@endif<form style="display:inline" method="POST" action="{{ route('logout') }}">@csrf<button style="background:none;border:0;color:#cbd5e1;cursor:pointer">Logout</button></form>@else<a href="{{ route('login') }}">Login</a><a href="{{ route('register') }}">Register</a>@endauth</span></nav>
 <main class="wrap">@if(session('status'))<div class="success">{{ session('status') }}</div>@endif @yield('content')</main>
 </body>
 </html>

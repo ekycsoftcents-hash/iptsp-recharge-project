@@ -14,6 +14,13 @@ use RuntimeException;
 
 final class BillingController extends Controller
 {
+    public function index(Request $request)
+    {
+        $plans = SubscriptionPlan::query()->where('is_active', true)->orderBy('monthly_price')->get();
+        $subscription = $request->user()->tenant?->activeSubscription;
+        return view('billing.index', compact('plans', 'subscription'));
+    }
+
     public function subscriptionCheckout(Request $request, PipraPayGateway $gateway): RedirectResponse
     {
         $data = $request->validate(['subscription_plan_id' => ['required', 'integer', 'exists:subscription_plans,id']]);

@@ -23,4 +23,6 @@ final class Tenant extends Model
     public function users(): HasMany { return $this->hasMany(User::class); }
     public function customers(): HasMany { return $this->hasMany(Customer::class); }
     public function wallet(): HasOne { return $this->hasOne(Wallet::class); }
+    public function subscriptions(): HasMany { return $this->hasMany(Subscription::class); }
+    public function activeSubscription(): HasOne { return $this->hasOne(Subscription::class)->whereIn('status', ['active', 'trialing'])->latestOfMany(); }
 }

@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/providers/credentials', [ProviderCredentialController::class, 'store'])->name('providers.credentials.store');
     Route::post('/providers/credentials/{credential}/test', [ProviderCredentialController::class, 'test'])->name('providers.credentials.test');
     Route::get('/recharges', [RechargeController::class, 'index'])->name('recharges.index');
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/recharges', [RechargeController::class, 'store'])->name('recharges.store');
     Route::post('/billing/subscription/checkout', [BillingController::class, 'subscriptionCheckout'])->name('billing.subscription.checkout');
     Route::get('/payments/piprapay/return', [BillingController::class, 'returnFromGateway'])->name('payments.piprapay.return');
