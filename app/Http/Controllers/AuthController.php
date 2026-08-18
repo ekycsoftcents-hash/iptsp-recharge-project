@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Recharge;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +15,19 @@ use Illuminate\View\View;
 
 final class AuthController extends Controller
 {
+    public function dashboard(Request $request): View
+    {
+        $tenant = $request->user()->tenant()->withCount('customers')->with(['wallet', 'activeSubscription'])->firstOrFail();
+        $recentRecharges = Recharge::query()->where('tenant_id', $tenant->id)->latest()->limit(8)->get();
+        $stats = [
+            'wallet' => (float) ($tenant->wallet?->balance ?? 0),
+            'customers' => (int) $tenant->customers_count,
+            'successful_recharges' => Recharge::query()->where('tenant_id', $tenant->id)->where('status', 'success')->count(),
+            'recharge_volume' => (float) Recharge::query()->where('tenant_id', $tenant->id)->where('status', 'success')->sum('amount'),
+        ];
+        return view('dashboard.home', compact('tenant', 'recentRecharges', 'stats'));
+    }
+
     public function showLogin(): View { return view('auth.login'); }
 
     public function login(Request $request): RedirectResponse
