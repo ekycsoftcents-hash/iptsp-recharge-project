@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+TMP="/tmp/laravel-skeleton-$(date +%s)"
+CUSTOM="/tmp/iptsp-custom-$(date +%s)"
+rm -rf "$TMP" "$CUSTOM"
+mkdir -p "$CUSTOM"
+cp -a "$ROOT/app" "$ROOT/config" "$ROOT/database" "$ROOT/resources" "$ROOT/routes" "$CUSTOM/"
+git clone --depth=1 https://github.com/laravel/laravel.git "$TMP"
+cp -a "$TMP/artisan" "$TMP/composer.json" "$TMP/package.json" "$TMP/phpunit.xml" "$ROOT/"
+if [[ -f "$TMP/composer.lock" ]]; then cp -a "$TMP/composer.lock" "$ROOT/"; fi
+cp -a "$TMP/bootstrap" "$ROOT/"
+cp -a "$TMP/public" "$ROOT/"
+cp -a "$TMP/storage" "$ROOT/"
+cp -a "$TMP/tests" "$ROOT/"
+cp -a "$TMP/config/." "$ROOT/config/"
+cp -a "$TMP/routes/." "$ROOT/routes/"
+cp -a "$TMP/database/." "$ROOT/database/"
+cp -a "$TMP/app/." "$ROOT/app/"
+cp -a "$TMP/resources/." "$ROOT/resources/"
+# Re-apply the custom IPTSP files after importing the official skeleton.
+cp -a "$CUSTOM/app/." "$ROOT/app/"
+cp -a "$CUSTOM/config/." "$ROOT/config/"
+cp -a "$CUSTOM/database/." "$ROOT/database/"
+cp -a "$CUSTOM/resources/." "$ROOT/resources/"
+cp -a "$CUSTOM/routes/." "$ROOT/routes/"
+rm -rf "$TMP" "$CUSTOM"
+echo "Full Laravel skeleton assembled. Review custom routes/resources before committing."
