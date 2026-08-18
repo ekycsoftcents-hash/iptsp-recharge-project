@@ -32,13 +32,15 @@ final class BillingController extends Controller
             'amount' => (string) $order->amount,
             'currency' => $order->currency,
             'merchant_order_id' => $order->merchant_order_id,
+            'full_name' => $request->user()->name,
+            'email_address' => $request->user()->email,
+            'mobile_number' => $request->user()->tenant?->phone ?? '',
             'return_url' => config('piprapay.return_url'),
-            'cancel_url' => config('piprapay.cancel_url'),
             'webhook_url' => route('webhooks.piprapay'),
-            'customer_email' => $request->user()->email,
+            'metadata' => ['order_id' => $order->merchant_order_id, 'payment_order_id' => $order->id],
         ]);
 
-        $url = $response['payment_url'] ?? $response['checkout_url'] ?? null;
+        $url = $response['payment_url'] ?? $response['checkout_url'] ?? $response['pp_url'] ?? $response['url'] ?? null;
         if (! is_string($url) || $url === '') {
             throw new RuntimeException('PipraPay did not return a payment URL. Confirm your API version and endpoint.');
         }

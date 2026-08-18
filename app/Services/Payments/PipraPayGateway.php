@@ -9,56 +9,55 @@ use RuntimeException;
 
 final class PipraPayGateway
 {
-    public function createPayment(array $payload): array
+    private function baseUrl(): string
     {
         $baseUrl = rtrim((string) config('piprapay.base_url'), '/');
         $apiKey = (string) config('piprapay.api_key');
-
         if ($baseUrl === '' || $apiKey === '') {
             throw new RuntimeException('PipraPay is not configured.');
         }
+        return $baseUrl;
+    }
 
-        // Confirm the exact endpoint and payload names against your PipraPay account/API version.
-        $response = Http::withToken($apiKey)
+    private function client()
+    {
+        return Http::withHeaders(['MH-PIPRAPAY-API-KEY' => (string) config('piprapay.api_key')])
             ->acceptJson()
             ->asJson()
-            ->timeout((int) config('piprapay.timeout', 20))
-            ->post($baseUrl . '/api/payment/create', $payload);
+            ->timeout((int) config('piprapay.timeout', 20));
+    }
+
+    public function createPayment(array $payload): array
+    {
+        $response = $this->client()->post($this->baseUrl() . '/api/checkout/redirect', [
+            'full_name' => $payload['full_name'],
+            'email_address' => $payload['email_address'],
+            'mobile_number' => $payload['mobile_number'] ?? '',
+            'amount' => (string) $payload['amount'],
+            'currency' => $payload['currency'] ?? 'BDT',
+            'metadata' => json_encode($payload['metadata'] ?? [], JSON_UNESCAPED_SLASHES),
+            'return_url' => $payload['return_url'],
+            'webhook_url' => $payload['webhook_url'],
+        ]);
 
         if ($response->failed()) {
-            throw new RuntimeException('PipraPay payment creation failed: ' . $response->body());
+            throw new RuntimeException('PipraPay checkout creation failed: ' . $response->body());
         }
-
         return $response->json();
     }
 
-    public function verifyPayment(string $merchantOrderId): array
+    public function verifyPayment(string $ppId): array
     {
-        $baseUrl = rtrim((string) config('piprapay.base_url'), '/');
-        $apiKey = (string) config('piprapay.api_key');
-
-        $response = Http::withToken($apiKey)
-            ->acceptJson()
-            ->timeout((int) config('piprapay.timeout', 20))
-            ->get($baseUrl . '/api/payment/verify', [
-                'merchant_order_id' => $merchantOrderId,
-            ]);
-
+        $response = $this->client()->post($this->baseUrl() . '/api/verify-payments', ['pp_id' => $ppId]);
         if ($response->failed()) {
             throw new RuntimeException('PipraPay payment verification failed: ' . $response->body());
         }
-
         return $response->json();
     }
 
-    public function isValidWebhook(array $payload, ?string $signature): bool
+    public function isValidWebhook(?string $providedApiKey): bool
     {
-        $secret = (string) config('piprapay.webhook_secret');
-        if ($secret === '' || $signature === null) {
-            return false;
-        }
-
-        $provided = hash_hmac('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES), $secret);
-        return hash_equals($provided, $signature);
+        $configured = (string) config('piprapay.api_key');
+        return $configured !== '' && $providedApiKey !== null && hash_equals($configured, $providedApiKey);
     }
 }

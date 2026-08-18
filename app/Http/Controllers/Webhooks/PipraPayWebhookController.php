@@ -15,28 +15,30 @@ final class PipraPayWebhookController extends Controller
 {
     public function handle(Request $request, PipraPayGateway $gateway): JsonResponse
     {
+        abort_unless($gateway->isValidWebhook($request->header('MH-PIPRAPAY-API-KEY')), 401, 'Invalid webhook API key.');
+
         $payload = $request->all();
-        $signature = $request->header('X-PipraPay-Signature');
-
-        abort_unless($gateway->isValidWebhook($payload, $signature), 401, 'Invalid webhook signature.');
-
-        $merchantOrderId = (string) ($payload['merchant_order_id'] ?? $payload['order_id'] ?? '');
-        $transactionId = (string) ($payload['transaction_id'] ?? $payload['trx_id'] ?? '');
+        $ppId = (string) ($payload['pp_id'] ?? '');
+        $metadata = is_array($payload['metadata'] ?? null) ? $payload['metadata'] : [];
+        $merchantOrderId = (string) ($metadata['order_id'] ?? $metadata['merchant_order_id'] ?? '');
+        $transactionId = (string) ($payload['transaction_id'] ?? '');
         $status = strtolower((string) ($payload['status'] ?? ''));
+        $successful = in_array($status, ['completed', 'paid', 'success'], true);
 
-        DB::transaction(function () use ($merchantOrderId, $transactionId, $status, $payload): void {
-            $order = PaymentOrder::query()->where('merchant_order_id', $merchantOrderId)->lockForUpdate()->firstOrFail();
-            if ($order->status === 'paid') {
+        DB::transaction(function () use ($merchantOrderId, $ppId, $transactionId, $successful, $payload): void {
+            $query = PaymentOrder::query()->lockForUpdate();
+            $order = $merchantOrderId !== '' ? $query->where('merchant_order_id', $merchantOrderId)->first() : null;
+            if (! $order || $order->status === 'paid') {
                 return;
             }
             $order->update([
-                'status' => in_array($status, ['paid', 'success', 'completed'], true) ? 'paid' : 'failed',
-                'gateway_transaction_id' => $transactionId ?: null,
+                'status' => $successful ? 'paid' : 'failed',
+                'gateway_transaction_id' => $transactionId !== '' ? $transactionId : ($ppId !== '' ? $ppId : null),
                 'gateway_response' => $payload,
-                'paid_at' => in_array($status, ['paid', 'success', 'completed'], true) ? now() : null,
+                'paid_at' => $successful ? now() : null,
             ]);
         });
 
-        return response()->json(['received' => true]);
+        return response()->json(['status' => true, 'message' => 'Webhook received']);
     }
 }
