@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProviderCredentialController;
+use App\Http\Controllers\RechargeController;
 use App\Http\Controllers\Webhooks\PipraPayWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/providers/credentials', [ProviderCredentialController::class, 'index'])->name('providers.credentials');
     Route::post('/providers/credentials', [ProviderCredentialController::class, 'store'])->name('providers.credentials.store');
     Route::post('/providers/credentials/{credential}/test', [ProviderCredentialController::class, 'test'])->name('providers.credentials.test');
+    Route::get('/recharges', [RechargeController::class, 'index'])->name('recharges.index');
+    Route::post('/recharges', [RechargeController::class, 'store'])->name('recharges.store');
     Route::post('/billing/subscription/checkout', [BillingController::class, 'subscriptionCheckout'])->name('billing.subscription.checkout');
     Route::get('/payments/piprapay/return', [BillingController::class, 'returnFromGateway'])->name('payments.piprapay.return');
     Route::get('/payments/piprapay/cancel', [BillingController::class, 'cancelFromGateway'])->name('payments.piprapay.cancel');
