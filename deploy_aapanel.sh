@@ -49,10 +49,12 @@ cp -a "$TMP_DIR/repo/README.md" "$APP_DIR/README-IPTSP.md"
 cd "$APP_DIR"
 composer install --no-dev --optimize-autoloader --no-interaction
 
-if [[ ! -f .env ]]; then
+if [[ -f "$BACKUP_DIR/.env" ]]; then
+  cp "$BACKUP_DIR/.env" .env
+elif [[ ! -f .env ]]; then
   cp .env.example .env
+  php artisan key:generate --force
 fi
-php artisan key:generate --force
 php artisan optimize:clear
 php artisan migrate --force
 php artisan db:seed --force
