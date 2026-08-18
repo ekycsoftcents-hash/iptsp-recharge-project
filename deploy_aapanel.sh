@@ -37,8 +37,11 @@ composer create-project laravel/laravel "$APP_DIR" "^12.0" --no-interaction
 
 # Merge the IPTSP starter code into the Laravel scaffold.
 cp -a "$TMP_DIR/repo/app/." "$APP_DIR/app/"
-cp -a "$TMP_DIR/repo/config/piprapay.php" "$APP_DIR/config/piprapay.php"
+cp -a "$TMP_DIR/repo/config/." "$APP_DIR/config/"
 cp -a "$TMP_DIR/repo/database/migrations/." "$APP_DIR/database/migrations/"
+cp -a "$TMP_DIR/repo/database/seeders/." "$APP_DIR/database/seeders/"
+cp -a "$TMP_DIR/repo/resources/." "$APP_DIR/resources/"
+cp -a "$TMP_DIR/repo/routes/." "$APP_DIR/routes/"
 cp -a "$TMP_DIR/repo/docs" "$APP_DIR/"
 cp -a "$TMP_DIR/repo/.env.example" "$APP_DIR/.env.example"
 cp -a "$TMP_DIR/repo/README.md" "$APP_DIR/README-IPTSP.md"
@@ -51,6 +54,8 @@ if [[ ! -f .env ]]; then
 fi
 php artisan key:generate --force
 php artisan optimize:clear
+php artisan migrate --force
+php artisan db:seed --force
 
 chown -R www:www "$APP_DIR"
 chmod -R ug+rwX storage bootstrap/cache
