@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CustomerController;
@@ -28,6 +29,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/billing/subscription/checkout', [BillingController::class, 'subscriptionCheckout'])->name('billing.subscription.checkout');
     Route::get('/payments/piprapay/return', [BillingController::class, 'returnFromGateway'])->name('payments.piprapay.return');
     Route::get('/payments/piprapay/cancel', [BillingController::class, 'cancelFromGateway'])->name('payments.piprapay.cancel');
+
+    Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::patch('/tenants/{tenant}/status', [AdminController::class, 'updateTenantStatus'])->name('tenants.status');
+    });
 });
 
 Route::post('/webhooks/piprapay', [PipraPayWebhookController::class, 'handle'])->name('webhooks.piprapay');

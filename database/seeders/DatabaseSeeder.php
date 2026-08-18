@@ -22,6 +22,8 @@ final class DatabaseSeeder extends Seeder
             'name' => 'Enterprise', 'description' => 'For high-volume IPTSP resellers.', 'monthly_price' => 1999, 'currency' => 'BDT', 'max_users' => 50, 'max_customers' => null, 'features' => ['customer_management', 'wallet', 'reports', 'multi_provider', 'priority_support'], 'is_active' => true,
         ]);
 
+        $this->call(DemoUsersSeeder::class);
+
         foreach ([
             ['name' => 'iTalk', 'code' => 'italk', 'adapter_class' => \App\Services\Providers\ItalkProvider::class],
             ['name' => 'Ranksitt', 'code' => 'ranksitt', 'adapter_class' => \App\Services\Providers\RanksittProvider::class],

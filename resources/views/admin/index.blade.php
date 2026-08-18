@@ -1,0 +1,7 @@
+@extends('layouts.app')
+@section('content')
+<h1>Super Admin</h1>
+<p class="muted">Manage reseller tenants and monthly plans.</p>
+<div class="card"><h2>Subscription plans</h2><div class="grid">@foreach($plans as $plan)<div class="card"><strong>{{ $plan->name }}</strong><div>৳ {{ number_format((float)$plan->monthly_price, 2) }}/month</div><small>{{ $plan->max_customers ?: 'Unlimited' }} customers</small></div>@endforeach</div></div>
+<div class="card"><h2>Tenants</h2><table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:10px">Business</th><th style="text-align:left;padding:10px">Email</th><th style="text-align:left;padding:10px">Status</th><th style="text-align:left;padding:10px">Action</th></tr>@forelse($tenants as $tenant)<tr><td style="padding:10px">{{ $tenant->name }}</td><td style="padding:10px">{{ $tenant->email }}</td><td style="padding:10px">{{ $tenant->status }}</td><td style="padding:10px"><form method="POST" action="{{ route('admin.tenants.status', $tenant) }}">@csrf @method('PATCH')<select name="status"><option value="pending">pending</option><option value="active">active</option><option value="suspended">suspended</option><option value="cancelled">cancelled</option></select><button>Save</button></form></td></tr>@empty<tr><td colspan="4" style="padding:20px">No tenants.</td></tr>@endforelse</table>{{ $tenants->links() }}</div>
+@endsection
